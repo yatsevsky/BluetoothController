@@ -1,7 +1,5 @@
+package com.bluetooth.manager.tools;
 
-package com.bluetooth.manager;
-
-import com.bluetooth.manager.tools.Logger;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -24,12 +22,12 @@ public class BluetoothDevicesReceiver extends BroadcastReceiver
 
             if (bluetoothDevice.getBondState() != BluetoothDevice.BOND_BONDED)
             {
-                this.logger.d("Device founded = " + bluetoothDevice.getName() + ", address = [" + bluetoothDevice.getAddress() + "]");
+                this.logger.d("Device founded: " + bluetoothDevice.getName() + ", address: [" + bluetoothDevice.getAddress() + "]");
             }
         }
         else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
         {
-            // TODO Auto-generated method stub
+            this.logger.d("Discovery finished");
         }
     }
 }

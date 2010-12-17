@@ -2,10 +2,6 @@ package com.bluetooth.manager;
 
 import java.util.UUID;
 
-import com.bluetooth.manager.thread.AcceptThread;
-import com.bluetooth.manager.thread.ConnectThread;
-import com.bluetooth.manager.thread.ConnectedThread;
-
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
@@ -14,17 +10,6 @@ import android.os.Message;
 
 public class BluetoothManager
 {
-    private final Handler      handler;
-    private AcceptThread       acceptThread;
-    private ConnectThread      connectThread;
-    private ConnectedThread    connectedThread;
-    private int                state;
-
-    public static final String name                 = BluetoothManager.class.getSimpleName();
-    public static final UUID   uuid                 = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-
-    public static final String MESSAGE_TAG          = "MESSAGE_TAG";
-
     public static final int    STATE_PENDING        = 0;
     public static final int    STATE_LISTENING      = 1;
     public static final int    STATE_CONNECTING     = 2;
@@ -35,24 +20,24 @@ public class BluetoothManager
     public static final int    MESSAGE_WRITE_DATA   = 2;
     public static final int    MESSAGE_MESSAGE      = 3;
 
+    public static final String name                 = BluetoothManager.class.getSimpleName();
+    public static final UUID   uuid                 = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+
+    public static final String MESSAGE_TAG          = "MESSAGE_TAG";
+
+    private final Handler      handler;
+    private AcceptThread       acceptThread;
+    private ConnectThread      connectThread;
+    private ConnectedThread    connectedThread;
+    private int                state;
+
     public BluetoothManager(Handler handler)
     {
         this.handler = handler;
         setState(STATE_PENDING);
     }
 
-    private synchronized void setState(int state)
-    {
-        this.state = state;
-        this.handler.obtainMessage(MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
-    }
-
-    public synchronized int getState()
-    {
-        return this.state;
-    }
-
-    public synchronized void listen()
+    public void listen()
     {
         if (getState() != STATE_PENDING)
         {
@@ -63,7 +48,7 @@ public class BluetoothManager
         this.acceptThread.start();
     }
 
-    public synchronized void stopListening()
+    public void stopListening()
     {
         if (getState() != STATE_LISTENING)
         {
@@ -73,7 +58,7 @@ public class BluetoothManager
         this.acceptThread.cancel();
     }
 
-    public synchronized void connect(BluetoothDevice bluetoothDevice)
+    public void connect(BluetoothDevice bluetoothDevice)
     {
         if (getState() != STATE_PENDING)
         {
@@ -84,7 +69,17 @@ public class BluetoothManager
         this.connectThread.start();
     }
 
-    public synchronized void connected(BluetoothSocket bluetoothSocket)
+    public void disconnect()
+    {
+        if (getState() != STATE_CONNECTED)
+        {
+            return;
+        }
+        setState(STATE_PENDING);
+        this.connectedThread.cancel();
+    }
+
+    void connected(BluetoothSocket bluetoothSocket)
     {
         if (getState() != STATE_CONNECTING)
         {
@@ -95,17 +90,7 @@ public class BluetoothManager
         this.connectedThread.start();
     }
 
-    public synchronized void disconnect()
-    {
-        if (getState() != STATE_CONNECTED)
-        {
-            return;
-        }
-        setState(STATE_PENDING);
-        this.connectedThread.cancel();
-    }
-
-    public void acceptionFailed()
+    void acceptionFailed()
     {
         if (getState() != STATE_LISTENING)
         {
@@ -120,7 +105,7 @@ public class BluetoothManager
         this.handler.sendMessage(message);
     }
 
-    public void connectionFailed()
+    void connectionFailed()
     {
         if (getState() != STATE_CONNECTING)
         {
@@ -135,7 +120,7 @@ public class BluetoothManager
         this.handler.sendMessage(message);
     }
 
-    public void connectionLost()
+    void connectionLost()
     {
         if (getState() != STATE_CONNECTED)
         {
@@ -150,28 +135,25 @@ public class BluetoothManager
         this.handler.sendMessage(message);
     }
 
-    public void write(byte[] writeBuffer)
-    {
-        if (getState() != STATE_CONNECTED)
-        {
-            return;
-        }
-        notify();
-        ConnectedThread ct;
-        synchronized (this)
-        {
-            ct = this.connectedThread;
-        }
-        ct.write(writeBuffer);
-    }
-
-    public void writeNotification(byte[] writeBuffer)
+    void writeNotification(byte[] writeBuffer)
     {
         this.handler.obtainMessage(BluetoothManager.MESSAGE_WRITE_DATA, -1, -1, writeBuffer).sendToTarget();
     }
 
-    public void readNotification(int bytes, byte[] readBuffer)
+    void readNotification(int bytes, byte[] readBuffer)
     {
         this.handler.obtainMessage(BluetoothManager.MESSAGE_READ_DATA, bytes, -1, readBuffer).sendToTarget();
     }
+
+    private int getState()
+    {
+        return this.state;
+    }
+
+    private void setState(int state)
+    {
+        this.state = state;
+        this.handler.obtainMessage(MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+    }
+
 }

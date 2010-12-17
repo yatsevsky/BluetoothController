@@ -1,6 +1,6 @@
-package com.bluetooth.manager;
+package com.bluetooth.manager.tools;
 
-import com.bluetooth.manager.tools.Logger;
+import com.bluetooth.manager.BluetoothManager;
 
 import android.os.Handler;
 import android.os.Message;

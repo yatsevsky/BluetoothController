@@ -2,9 +2,9 @@ package com.bluetooth;
 
 import java.util.Set;
 
-import com.bluetooth.manager.BluetoothDevicesReceiver;
-import com.bluetooth.manager.BluetoothHandler;
 import com.bluetooth.manager.BluetoothManager;
+import com.bluetooth.manager.tools.BluetoothDevicesReceiver;
+import com.bluetooth.manager.tools.BluetoothHandler;
 import com.bluetooth.manager.tools.Logger;
 
 import android.app.Activity;
@@ -19,18 +19,38 @@ import android.view.View.OnClickListener;
 
 public class DemoActivity extends Activity
 {
-    private static final int  REQUEST_ENABLE_BLUETOOTH = 0;
-    private static final int  DISCOVERABLE_DURATION    = 300;
+    private static final int        REQUEST_ENABLE_BLUETOOTH = 0;
+    private static final int        DISCOVERABLE_DURATION    = 300;
 
-    private BluetoothAdapter  bluetoothAdapter;
-    private BroadcastReceiver broadcastReceiver;
-    private BluetoothManager  bluetoothManager;
+    private final BluetoothAdapter  bluetoothAdapter         = BluetoothAdapter.getDefaultAdapter();
+    private final BroadcastReceiver broadcastReceiver        = new BluetoothDevicesReceiver();
+    private final BluetoothManager  bluetoothManager         = new BluetoothManager(new BluetoothHandler());
 
-    private Logger            logger                   = new Logger(this);
+    private Logger                  logger                   = new Logger(this);
 
     public BluetoothManager getBluetoothManager()
     {
         return this.bluetoothManager;
+    }
+
+    void startDiscovery()
+    {
+        this.bluetoothAdapter.startDiscovery();
+    }
+
+    void getBondedDevices()
+    {
+        Set<BluetoothDevice> bluetoothDevices = this.bluetoothAdapter.getBondedDevices();
+
+        if (bluetoothDevices.isEmpty())
+        {
+            return;
+        }
+
+        for (BluetoothDevice bluetoothDevice : bluetoothDevices)
+        {
+            this.logger.d("Bounded device founded: " + bluetoothDevice.getName() + ", address: [" + bluetoothDevice.getAddress() + "]");
+        }
     }
 
     @Override
@@ -40,7 +60,23 @@ public class DemoActivity extends Activity
 
         setContentView(R.layout.main);
 
-        this.bluetoothManager = new BluetoothManager(new BluetoothHandler());
+        findViewById(R.id.button_start_discovery).setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                startDiscovery();
+            }
+        });
+
+        findViewById(R.id.button_bonded_devices).setOnClickListener(new OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                getBondedDevices();
+            }
+        });
 
         findViewById(R.id.button_listen).setOnClickListener(new OnClickListener()
         {
@@ -60,8 +96,6 @@ public class DemoActivity extends Activity
             }
         });
 
-        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
         if (this.bluetoothAdapter == null)
         {
             throw new NullPointerException();
@@ -80,25 +114,11 @@ public class DemoActivity extends Activity
             startActivity(intent);
         }
 
-        Set<BluetoothDevice> bluetoothDevices = this.bluetoothAdapter.getBondedDevices();
-
-        if (!bluetoothDevices.isEmpty())
-        {
-            for (BluetoothDevice bluetoothDevice : bluetoothDevices)
-            {
-                this.logger.d("Bounded device founded = " + bluetoothDevice.getName() + ", address = [" + bluetoothDevice.getAddress() + "]");
-            }
-        }
-
-        this.broadcastReceiver = new BluetoothDevicesReceiver();
-
         IntentFilter intentFilter;
         intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(this.broadcastReceiver, intentFilter);
         intentFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(this.broadcastReceiver, intentFilter);
-
-        this.bluetoothAdapter.startDiscovery();
     }
 
     @Override
@@ -106,6 +126,8 @@ public class DemoActivity extends Activity
     {
         super.onDestroy();
         unregisterReceiver(this.broadcastReceiver);
+        this.bluetoothAdapter.cancelDiscovery();
+        this.bluetoothAdapter.disable();
     }
 
     @Override

@@ -1,8 +1,7 @@
-package com.bluetooth.manager.thread;
+package com.bluetooth.manager;
 
 import java.io.IOException;
 
-import com.bluetooth.manager.BluetoothManager;
 import com.bluetooth.manager.tools.Logger;
 
 import android.bluetooth.BluetoothAdapter;

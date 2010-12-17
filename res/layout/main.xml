@@ -5,6 +5,16 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
     <Button
+        android:id="@+id/button_start_discovery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/start_discovery" />
+    <Button
+        android:id="@+id/button_bonded_devices"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/bonded_devices" />
+    <Button
         android:id="@+id/button_listen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
