@@ -81,7 +81,7 @@ public class BluetoothManager
 
     void connected(BluetoothSocket bluetoothSocket)
     {
-        if (getState() != STATE_CONNECTING)
+        if (getState() != STATE_LISTENING || getState() != STATE_CONNECTING)
         {
             return;
         }
@@ -155,5 +155,4 @@ public class BluetoothManager
         this.state = state;
         this.handler.obtainMessage(MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
     }
-
 }

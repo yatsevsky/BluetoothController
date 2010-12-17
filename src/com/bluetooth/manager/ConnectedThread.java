@@ -63,7 +63,7 @@ public class ConnectedThread extends Thread
         this.logger.d("Stop connected thread");
     }
 
-    public void write(byte[] writeBuffer)
+    void write(byte[] writeBuffer)
     {
         try
         {
@@ -76,7 +76,7 @@ public class ConnectedThread extends Thread
         }
     }
 
-    public void cancel()
+    void cancel()
     {
         try
         {

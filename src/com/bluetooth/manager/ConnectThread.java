@@ -60,7 +60,7 @@ public class ConnectThread extends Thread
         this.bluetoothManager.connected(this.bluetoothSocket);
     }
 
-    public void cancel()
+    void cancel()
     {
         try
         {

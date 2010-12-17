@@ -2,11 +2,6 @@ package com.bluetooth;
 
 import java.util.Set;
 
-import com.bluetooth.manager.BluetoothManager;
-import com.bluetooth.manager.tools.BluetoothDevicesReceiver;
-import com.bluetooth.manager.tools.BluetoothHandler;
-import com.bluetooth.manager.tools.Logger;
-
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -17,10 +12,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 
+import com.bluetooth.manager.BluetoothManager;
+import com.bluetooth.manager.tools.BluetoothDevicesReceiver;
+import com.bluetooth.manager.tools.BluetoothHandler;
+import com.bluetooth.manager.tools.Logger;
+
 public class DemoActivity extends Activity
 {
     private static final int        REQUEST_ENABLE_BLUETOOTH = 0;
-    private static final int        DISCOVERABLE_DURATION    = 300;
+    private static final int        DISCOVERABLE_DURATION    = 10;
 
     private final BluetoothAdapter  bluetoothAdapter         = BluetoothAdapter.getDefaultAdapter();
     private final BroadcastReceiver broadcastReceiver        = new BluetoothDevicesReceiver();
@@ -46,11 +46,17 @@ public class DemoActivity extends Activity
         {
             return;
         }
-
         for (BluetoothDevice bluetoothDevice : bluetoothDevices)
         {
             this.logger.d("Bounded device founded: " + bluetoothDevice.getName() + ", address: [" + bluetoothDevice.getAddress() + "]");
         }
+    }
+
+    void makeDeviceDiscoverable()
+    {
+        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVERABLE_DURATION);
+        startActivity(intent);
     }
 
     @Override
@@ -83,6 +89,7 @@ public class DemoActivity extends Activity
             @Override
             public void onClick(View view)
             {
+                makeDeviceDiscoverable();
                 getBluetoothManager().listen();
             }
         });
@@ -107,13 +114,6 @@ public class DemoActivity extends Activity
             startActivityForResult(intent, REQUEST_ENABLE_BLUETOOTH);
         }
 
-        if (this.bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE)
-        {
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVERABLE_DURATION);
-            startActivity(intent);
-        }
-
         IntentFilter intentFilter;
         intentFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(this.broadcastReceiver, intentFilter);
@@ -128,6 +128,8 @@ public class DemoActivity extends Activity
         unregisterReceiver(this.broadcastReceiver);
         this.bluetoothAdapter.cancelDiscovery();
         this.bluetoothAdapter.disable();
+        this.bluetoothManager.stopListening();
+        this.bluetoothManager.disconnect();
     }
 
     @Override

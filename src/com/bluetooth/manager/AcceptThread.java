@@ -50,7 +50,7 @@ public class AcceptThread extends Thread
         this.bluetoothManager.connected(bluetoothSocket);
     }
 
-    public void cancel()
+    void cancel()
     {
         try
         {
