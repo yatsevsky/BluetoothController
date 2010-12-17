@@ -18,11 +18,7 @@ public class AcceptThread extends Thread
     public AcceptThread(BluetoothManager bluetoothManager)
     {
         setName("AcceptThread");
-
-        this.logger.d("Creating accept thread");
-
         this.bluetoothManager = bluetoothManager;
-
         BluetoothServerSocket bss = null;
         try
         {
@@ -39,7 +35,6 @@ public class AcceptThread extends Thread
     public void run()
     {
         this.logger.d("Start accept thread");
-
         BluetoothSocket bluetoothSocket = null;
         try
         {
@@ -48,27 +43,12 @@ public class AcceptThread extends Thread
         catch (IOException e)
         {
             this.logger.ex(e);
-        }
-        if (bluetoothSocket != null)
-        {
-            synchronized (this.bluetoothManager)
-            {
-                if (this.bluetoothManager.getState() != BluetoothManager.STATE_CONNECTING)
-                {
-                    try
-                    {
-                        bluetoothSocket.close();
-                    }
-                    catch (IOException e)
-                    {
-                        this.logger.ex(e);
-                    }
-                    return;
-                }
-                this.bluetoothManager.connected(bluetoothSocket);
-            }
+            this.bluetoothManager.acceptionFailed();
+            this.logger.d("Stop accept thread because of exception");
+            return;
         }
         this.logger.d("Stop accept thread");
+        this.bluetoothManager.connected(bluetoothSocket);
     }
 
     public void cancel()

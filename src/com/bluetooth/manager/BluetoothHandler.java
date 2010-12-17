@@ -1,4 +1,3 @@
-
 package com.bluetooth.manager;
 
 import com.bluetooth.manager.tools.Logger;

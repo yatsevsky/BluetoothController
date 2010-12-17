@@ -11,14 +11,19 @@ import android.bluetooth.BluetoothSocket;
 
 public class ConnectedThread extends Thread
 {
-    private final Logger           logger = new Logger(this);
+    private final Logger           logger           = new Logger(this);
     private final BluetoothManager bluetoothManager;
     private final BluetoothSocket  bluetoothSocket;
     private final InputStream      inputStream;
     private final OutputStream     outputStream;
 
+    private static final int       READ_BUFFER_SIZE = 1 * 1024;
+
+    // private static final int WRITE_BUFFER_SIZE = 4 * 1024;
+
     public ConnectedThread(BluetoothManager bluetoothManager, BluetoothSocket bluetoothSocket)
     {
+        setName("ConnectedThread");
         this.bluetoothManager = bluetoothManager;
         this.bluetoothSocket = bluetoothSocket;
         InputStream is = null;
@@ -39,7 +44,8 @@ public class ConnectedThread extends Thread
     @Override
     public void run()
     {
-        byte[] readBuffer = new byte[1024];
+        this.logger.d("Start connected thread");
+        byte[] readBuffer = new byte[READ_BUFFER_SIZE];
         int bytes;
         while (true)
         {
@@ -55,6 +61,7 @@ public class ConnectedThread extends Thread
                 break;
             }
         }
+        this.logger.d("Stop connected thread");
     }
 
     public void write(byte[] writeBuffer)

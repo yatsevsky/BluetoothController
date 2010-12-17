@@ -18,6 +18,7 @@ public class ConnectThread extends Thread
 
     public ConnectThread(BluetoothManager bluetoothManager, BluetoothDevice bluetoothDevice)
     {
+        setName("ConnectThread");
         this.bluetoothManager = bluetoothManager;
         this.bluetoothDevice = bluetoothDevice;
         BluetoothSocket bs = null;
@@ -35,7 +36,7 @@ public class ConnectThread extends Thread
     @Override
     public void run()
     {
-        setName("ConnectThread");
+        this.logger.d("Start connect thread");
         BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
         try
         {
@@ -43,6 +44,7 @@ public class ConnectThread extends Thread
         }
         catch (IOException e)
         {
+            this.logger.ex(e);
             this.bluetoothManager.connectionFailed();
             try
             {
@@ -52,12 +54,10 @@ public class ConnectThread extends Thread
             {
                 this.logger.ex(e2);
             }
+            this.logger.d("Stop connect thread because of exception");
             return;
         }
-        // synchronized (BluetoothManager.this)
-        // {
-        // BluetoothManager.this.connectThread = null;
-        // }
+        this.logger.d("Stop connect thread");
         this.bluetoothManager.connected(this.bluetoothSocket);
     }
 

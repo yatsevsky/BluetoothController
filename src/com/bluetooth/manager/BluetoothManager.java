@@ -105,6 +105,21 @@ public class BluetoothManager
         this.connectedThread.cancel();
     }
 
+    public void acceptionFailed()
+    {
+        if (getState() != STATE_LISTENING)
+        {
+            return;
+        }
+        setState(STATE_PENDING);
+
+        Message message = this.handler.obtainMessage(MESSAGE_MESSAGE);
+        Bundle bundle = new Bundle();
+        bundle.putString(MESSAGE_TAG, "Unable to accept device");
+        message.setData(bundle);
+        this.handler.sendMessage(message);
+    }
+
     public void connectionFailed()
     {
         if (getState() != STATE_CONNECTING)

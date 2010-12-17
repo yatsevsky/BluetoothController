@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:text="@string/listen" />
     <Button
-        android:id="@+id/button_stopListening"
+        android:id="@+id/button_stop_listening"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/stop_listening" />
